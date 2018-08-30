@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Simple Counter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    <div>
+        <p id="counter-value"></p>
+        <button id="increment">Increment</button>
+        <button id="decrement">Decrement</button>
+        <button id="reset">Reset</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="web3.min.js"></script>
+    
+    <script>
+        var contract;
+
+        $(document).ready(function(){
+            initContract();
+            getValue();
+        })
+    
+        function initContract() {
+            web3 = new Web3(web3.currentProvider);
+            var address = "0x5c9b226587a188f32be36e26702485c025185245"
+            var abi = [
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "decrement",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "increment",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": false,
+                    "inputs": [],
+                    "name": "reset",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "constructor"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "getCounter",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "int256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ]
+            contract = new web3.eth.Contract(abi, address)
+        }
+
+        function getValue() {
+            contract.methods.getCounter().call().then((result) => {
+               $('#counter-value').html(result);
+            })
+        }
+
+        $('#increment').click(function() {
+            web3.eth.getAccounts().then(function(accounts) {
+                var acct = accounts[0];
+                return contract.methods.increment().send({from: acct});
+            }).then(function(tx) {
+                console.log(tx);
+                var curr = parseInt($('#counter-value').html());
+                $('#counter-value').html(curr + 1);
+            }).catch(function(err){
+                console.log(err);
+            })
+        })
+
+        $('#decrement').click(function() {
+            web3.eth.getAccounts().then(function(accounts) {
+                var acct = accounts[0];
+                return contract.methods.decrement().send({from: acct});
+            }).then(function(tx) {
+                console.log(tx);
+                var curr = parseInt($('#counter-value').html());
+                $('#counter-value').html(curr - 1);
+            }).catch(function(err){
+                console.log(err);
+            })
+        })
+
+        $('#reset').click(function() {
+            web3.eth.getAccounts().then(function(accounts) {
+                var acct = accounts[0];
+                return contract.methods.reset().send({from: acct});
+            }).then(function(tx) {
+                console.log(tx);
+                var curr = parseInt($('#counter-value').html());
+                $('#counter-value').html(curr - curr);
+            }).catch(function(err){
+                console.log(err);
+            })
+        })
+    </script>
+
+</body>
+</html>
